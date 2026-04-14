@@ -106,6 +106,12 @@ Use this order while presenting:
 
 ---
 
+## If product images are not visible
+
+If the external image host is blocked on your network, the frontend now falls back to built-in SVG placeholder images automatically, so your UI demo will still look complete.
+
+---
+
 ## Complete Command Checklist (quick copy)
 
 ```bash
@@ -149,6 +155,93 @@ kubectl apply -f k8s/ -R
 After deployment, use:
 
 ```bash
+kubectl get pods -n ecommerce-demo
+kubectl get svc -n ecommerce-demo
+kubectl get ingress -n ecommerce-demo
+```
+
+## How to show Grafana, Prometheus, Jenkins, Selenium, Kubernetes, and Docker
+
+### 1) Kubernetes status (cluster + app health)
+
+```bash
+kubectl config current-context
+kubectl get nodes
+kubectl get all -n ecommerce-demo
+kubectl get hpa -n ecommerce-demo
+```
+
+### 2) Prometheus UI
+
+```bash
+kubectl port-forward svc/prometheus 9090:9090 -n ecommerce-demo
+```
+
+Open `http://localhost:9090`, then run sample query:
+
+```promql
+sum(rate(order_service_checkout_success_total[5m]))
+```
+
+### 3) Grafana UI
+
+```bash
+kubectl port-forward svc/grafana 3000:3000 -n ecommerce-demo
+```
+
+Open `http://localhost:3000` and load dashboard **ECommerce Overview** (uid: `ecommerce-overview`).
+
+### 4) Selenium Grid UI
+
+```bash
+kubectl port-forward svc/selenium-hub 4444:4444 -n ecommerce-demo
+```
+
+Open `http://localhost:4444/ui` to show active nodes and sessions.
+
+To execute smoke tests:
+
+```bash
+npm run test:selenium
+```
+
+### 5) Jenkins
+
+This repository includes a Jenkins pipeline (`Jenkinsfile`) that runs build, unit tests, API tests, Selenium tests, Docker image build/push, and Kubernetes deploy.
+
+If Jenkins is already running in your lab, open its job UI and show pipeline stages:
+
+- Install & Build
+- Unit Tests
+- API / Integration Tests
+- Selenium Smoke Tests
+- Docker Build & Tag
+- Kubernetes Deploy
+
+If Jenkins is not running, start a local demo instance:
+
+```bash
+docker run --name jenkins \
+  -p 8080:8080 -p 50000:50000 \
+  -v jenkins_home:/var/jenkins_home \
+  -d jenkins/jenkins:lts
+```
+
+Then open `http://localhost:8080`.
+
+### 6) Docker evidence
+
+Show running containers and images:
+
+```bash
+docker ps
+docker images | head
+```
+
+If using Kubernetes with a local image registry, also show image references:
+
+```bash
+kubectl get deploy -n ecommerce-demo -o jsonpath='{range .items[*]}{.metadata.name}{" => "}{range .spec.template.spec.containers[*]}{.image}{" "}{end}{"\n"}{end}'
 kubectl get pods -n ecommerce
 kubectl get svc -n ecommerce
 kubectl get ingress -n ecommerce
