@@ -216,6 +216,18 @@ npm run test:selenium
 
 `npm run test:selenium` now sets `RUN_SELENIUM_SMOKE=1` so tests do not get silently skipped.
 
+If your browser session is in Docker/Selenium Grid and cannot reach `localhost`, set:
+
+```bash
+E2E_BASE_URL=http://host.docker.internal:5173 npm run test:selenium
+```
+
+If you're running against Kubernetes ingress:
+
+```bash
+E2E_BASE_URL=http://ecommerce.local npm run test:selenium
+```
+
 ### 5) Jenkins
 
 This repository includes a Jenkins pipeline (`Jenkinsfile`) that runs build, unit tests, API tests, Selenium tests, Docker image build/push, and Kubernetes deploy.
@@ -289,6 +301,20 @@ kubectl logs -n ecommerce-demo deploy/selenium-chrome --tail=80
 ```bash
 kubectl rollout restart deploy/selenium-hub -n ecommerce-demo
 kubectl rollout restart deploy/selenium-chrome -n ecommerce-demo
+```
+
+### Selenium test fails with `net::ERR_CONNECTION_REFUSED` at `browser.get(...)`
+
+This usually means Selenium browser cannot reach your app URL (network mismatch between host and container).
+
+Use one of these:
+
+```bash
+# app running with npm run dev:web on host machine
+E2E_BASE_URL=http://host.docker.internal:5173 npm run test:selenium
+
+# app running through Kubernetes ingress
+E2E_BASE_URL=http://ecommerce.local npm run test:selenium
 ```
 
 ### Grafana UI not loading
