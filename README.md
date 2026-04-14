@@ -232,6 +232,48 @@ E2E_BASE_URL=http://ecommerce.local npm run test:selenium
 
 This repository includes a Jenkins pipeline (`Jenkinsfile`) that runs build, unit tests, API tests, Selenium tests, Docker image build/push, and Kubernetes deploy.
 
+> If your Jenkins log fails with `npm: not found`, use the latest `Jenkinsfile` from this repo.  
+> It now has a **Prepare Node.js Runtime** stage that downloads Node.js 20 into the workspace before running `npm install`.
+
+If Jenkins is showing only the **InitialAdminPassword** page, do this first-time setup:
+
+1. Get unlock password:
+
+```bash
+docker exec -it jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
+2. Open `http://localhost:8080` and paste that password.
+3. Click **Install suggested plugins**.
+4. Create your admin user and save.
+5. Go to **Manage Jenkins → Plugins** and ensure these are installed:
+   - Pipeline
+   - Git
+   - Docker Pipeline
+   - NodeJS (optional now, because the pipeline bootstraps Node.js itself)
+6. Go to **Manage Jenkins → Tools**:
+   - Add NodeJS (optional)
+   - Add Git (if not auto-detected)
+7. Create Pipeline job:
+   - **New Item** → name: `ecommerce-platform` → **Pipeline**
+   - In **Pipeline** section choose **Pipeline script from SCM**
+   - SCM: **Git**
+   - Repo URL: your repo URL
+   - Branch: `*/main` (or your working branch)
+   - Script path: `Jenkinsfile`
+   - Save and click **Build Now**
+
+If Docker commands fail in Jenkins container, run Jenkins with Docker socket mounted:
+
+```bash
+docker rm -f jenkins
+docker run --name jenkins \
+  -p 8080:8080 -p 50000:50000 \
+  -v jenkins_home:/var/jenkins_home \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -d jenkins/jenkins:lts
+```
+
 If Jenkins is already running in your lab, open its job UI and show pipeline stages:
 
 - Install & Build
