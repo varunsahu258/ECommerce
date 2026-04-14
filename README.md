@@ -233,7 +233,7 @@ E2E_BASE_URL=http://ecommerce.local npm run test:selenium
 This repository includes a Jenkins pipeline (`Jenkinsfile`) that runs build, unit tests, API tests, Selenium tests, Docker image build/push, and Kubernetes deploy.
 
 > If your Jenkins log fails with `npm: not found`, use the latest `Jenkinsfile` from this repo.  
-> It now has a **Prepare Node.js Runtime** stage that downloads Node.js 20 into the workspace before running `npm install`.
+> It now has a **Prepare Node.js Runtime** stage that downloads a `.tar.gz` Node.js 20 build into the workspace before running `npm install` (so it does not require `xz` in the Jenkins container).
 
 If Jenkins is showing only the **InitialAdminPassword** page, do this first-time setup:
 

@@ -4,6 +4,7 @@ pipeline {
   environment {
     NODE_VERSION = "20.19.0"
     NODE_DISTRO = "node-v${NODE_VERSION}-linux-x64"
+    NODE_ARCHIVE = "${NODE_DISTRO}.tar.gz"
     NODE_DIR = "${WORKSPACE}/.tools/${NODE_DISTRO}"
     PATH = "${NODE_DIR}/bin:${PATH}"
     IMAGE_REGISTRY = "local"
@@ -22,8 +23,8 @@ pipeline {
 
           if [ ! -x "${NODE_DIR}/bin/npm" ]; then
             mkdir -p "${NODE_DIR}"
-            curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/${NODE_DISTRO}.tar.xz" -o /tmp/node.tar.xz
-            tar -xJf /tmp/node.tar.xz --strip-components=1 -C "${NODE_DIR}"
+            curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/${NODE_ARCHIVE}" -o /tmp/node.tar.gz
+            tar -xzf /tmp/node.tar.gz --strip-components=1 -C "${NODE_DIR}"
           fi
 
           node --version
