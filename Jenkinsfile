@@ -2,6 +2,10 @@ pipeline {
   agent any
 
   environment {
+    NODE_VERSION = "20.19.0"
+    NODE_DISTRO = "node-v${NODE_VERSION}-linux-x64"
+    NODE_DIR = "${WORKSPACE}/.tools/${NODE_DISTRO}"
+    PATH = "${NODE_DIR}/bin:${PATH}"
     IMAGE_REGISTRY = "local"
     IMAGE_TAG = "latest"
     K8S_NAMESPACE = "ecommerce-demo"
@@ -11,6 +15,23 @@ pipeline {
   }
 
   stages {
+    stage('Prepare Node.js Runtime') {
+      steps {
+        sh '''
+          set -eux
+
+          if [ ! -x "${NODE_DIR}/bin/npm" ]; then
+            mkdir -p "${NODE_DIR}"
+            curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/${NODE_DISTRO}.tar.xz" -o /tmp/node.tar.xz
+            tar -xJf /tmp/node.tar.xz --strip-components=1 -C "${NODE_DIR}"
+          fi
+
+          node --version
+          npm --version
+        '''
+      }
+    }
+
     stage('Install & Build') {
       steps {
         sh 'npm install'
