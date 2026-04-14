@@ -40,6 +40,19 @@ spec:
             - containerPort: 4444
             - containerPort: 4442
             - containerPort: 4443
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: 4444
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 4444
+            initialDelaySeconds: 20
+            periodSeconds: 20
 ---
 apiVersion: apps/v1
 kind: Deployment
