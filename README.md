@@ -234,9 +234,6 @@ This repository includes a Jenkins pipeline (`Jenkinsfile`) that runs build, uni
 
 > If your Jenkins log fails with `npm: not found`, use the latest `Jenkinsfile` from this repo.  
 > It now has a **Prepare Node.js Runtime** stage that downloads a `.tar.gz` Node.js 20 build into the workspace before running `npm install` (so it does not require `xz`), and it auto-detects `x64` vs `arm64` to avoid QEMU loader errors.
->
-> Selenium stage note: the pipeline now checks Grid reachability first. If Grid is down/unresolvable, the stage is marked **UNSTABLE** and the pipeline continues.  
-> Default Grid URL is `http://localhost:4444/wd/hub`; set `SELENIUM_GRID_URL` in Jenkins job env when your hub is elsewhere (for example `http://selenium-hub:4444/wd/hub` inside Kubernetes network/DNS).
 
 If Jenkins is showing only the **InitialAdminPassword** page, do this first-time setup:
 
