@@ -199,7 +199,14 @@ Then load dashboard **ECommerce Overview** (uid: `ecommerce-overview`).
 kubectl port-forward svc/selenium-hub 4444:4444 -n ecommerce-demo
 ```
 
-Open `http://localhost:4444/ui` to show active nodes and sessions.
+If `/ui` is blank in your browser, open one of these directly:
+
+- `http://localhost:4444/ui/`
+- `http://localhost:4444/ui/index.html#/`
+
+Also verify Grid status JSON:
+
+- `http://localhost:4444/status`
 
 To execute smoke tests:
 
@@ -258,6 +265,30 @@ kubectl get deploy -n ecommerce-demo -o jsonpath='{range .items[*]}{.metadata.na
 ```bash
 kubectl get pods -n ecommerce-demo | grep selenium
 kubectl logs -n ecommerce-demo deploy/selenium-hub --tail=50
+```
+
+### Selenium UI is blank at `http://localhost:4444/ui`
+
+1. Try `http://localhost:4444/ui/` or `http://localhost:4444/ui/index.html#/`.
+2. Check Grid health endpoint:
+
+```bash
+curl -s http://localhost:4444/status
+```
+
+3. Confirm pods are Ready and node is registered:
+
+```bash
+kubectl get pods -n ecommerce-demo | grep selenium
+kubectl logs -n ecommerce-demo deploy/selenium-hub --tail=80
+kubectl logs -n ecommerce-demo deploy/selenium-chrome --tail=80
+```
+
+4. Restart Selenium components if needed:
+
+```bash
+kubectl rollout restart deploy/selenium-hub -n ecommerce-demo
+kubectl rollout restart deploy/selenium-chrome -n ecommerce-demo
 ```
 
 ### Grafana UI not loading
