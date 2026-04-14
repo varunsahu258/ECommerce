@@ -2,6 +2,9 @@ pipeline {
   agent any
 
   environment {
+    NODE_VERSION = "20.19.0"
+    NODE_DIR = "${WORKSPACE}/.tools/node-current"
+    PATH = "${NODE_DIR}/bin:${PATH}"
     IMAGE_REGISTRY = "local"
     IMAGE_TAG = "latest"
     K8S_NAMESPACE = "ecommerce-demo"
@@ -11,6 +14,34 @@ pipeline {
   }
 
   stages {
+    stage('Prepare Node.js Runtime') {
+      steps {
+        sh '''
+          set -eux
+
+          if [ ! -x "${NODE_DIR}/bin/npm" ]; then
+            mkdir -p "${NODE_DIR}"
+            arch="$(uname -m)"
+            case "${arch}" in
+              x86_64) node_arch="x64" ;;
+              aarch64|arm64) node_arch="arm64" ;;
+              *)
+                echo "Unsupported architecture for Node bootstrap: ${arch}" >&2
+                exit 1
+                ;;
+            esac
+
+            node_distro="node-v${NODE_VERSION}-linux-${node_arch}"
+            curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/${node_distro}.tar.gz" -o /tmp/node.tar.gz
+            tar -xzf /tmp/node.tar.gz --strip-components=1 -C "${NODE_DIR}"
+          fi
+
+          node --version
+          npm --version
+        '''
+      }
+    }
+
     stage('Install & Build') {
       steps {
         sh 'npm install'
