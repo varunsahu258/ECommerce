@@ -39,6 +39,9 @@ If you need to present this in front of a professor, use the runbook below.
 
 ## Local Development
 
+1. Install dependencies with `npm install`.
+2. Start PostgreSQL locally or in Kubernetes using the credentials from `.env.example`.
+3. Run the services:
 ### 1) Prerequisites
 
 - Node.js 20+ and npm 10+
@@ -239,6 +242,9 @@ If using Kubernetes with a local image registry, also show image references:
 
 ```bash
 kubectl get deploy -n ecommerce-demo -o jsonpath='{range .items[*]}{.metadata.name}{" => "}{range .spec.template.spec.containers[*]}{.image}{" "}{end}{"\n"}{end}'
+kubectl get pods -n ecommerce
+kubectl get svc -n ecommerce
+kubectl get ingress -n ecommerce
 ```
 
 ## Observability
