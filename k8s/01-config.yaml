@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-config
+  namespace: ecommerce-demo
+data:
+  POSTGRES_DB: ecommerce
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: postgres
+  AUTH_SERVICE_PORT: "4001"
+  PRODUCT_SERVICE_PORT: "4002"
+  ORDER_SERVICE_PORT: "4003"
+  PRODUCT_SERVICE_URL: http://product-service:4002
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: platform-secrets
+  namespace: ecommerce-demo
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: postgres
+  JWT_SECRET: local-demo-secret
+  GRAFANA_ADMIN_PASSWORD: admin
+

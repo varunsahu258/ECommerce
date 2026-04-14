@@ -1,0 +1,26 @@
+{
+  "name": "ecommerce-platform",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*",
+    "tests"
+  ],
+  "scripts": {
+    "build": "npm --workspace @ecommerce/shared run build && npm --workspace @ecommerce/auth-service run build && npm --workspace @ecommerce/product-service run build && npm --workspace @ecommerce/order-service run build && npm --workspace @ecommerce/web run build",
+    "test": "npm run test --workspaces --if-present",
+    "test:unit": "npm run test:unit --workspaces --if-present",
+    "test:api": "npm --workspace @ecommerce/auth-service run test:api && npm --workspace @ecommerce/product-service run test:api && npm --workspace @ecommerce/order-service run test:api && npm --workspace @ecommerce/platform-tests run test:api",
+    "test:selenium": "npm --workspace @ecommerce/platform-tests run test:selenium",
+    "dev:web": "npm --workspace @ecommerce/web run dev",
+    "dev:auth": "npm --workspace @ecommerce/auth-service run dev",
+    "dev:product": "npm --workspace @ecommerce/product-service run dev",
+    "dev:order": "npm --workspace @ecommerce/order-service run dev"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
