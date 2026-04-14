@@ -1,8 +1,8 @@
 import { createServer } from "node:http";
-import { bootstrapDatabase } from "./db/bootstrap";
-import { pool } from "./db/pool";
-import { env } from "./config/env";
-import { createApp } from "./app";
+import { bootstrapDatabase } from "./db/bootstrap.js";
+import { pool } from "./db/pool.js";
+import { env } from "./config/env.js";
+import { createApp } from "./app.js";
 
 const start = async () => {
   await bootstrapDatabase();
@@ -17,4 +17,3 @@ start().catch(async (error) => {
   await pool.end();
   process.exit(1);
 });
-

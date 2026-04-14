@@ -1,6 +1,6 @@
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createApp } from "../app";
+import { createApp } from "../app.js";
 
 vi.mock("../services/user-service", () => ({
   ServiceError: class ServiceError extends Error {
@@ -23,7 +23,7 @@ vi.mock("../services/token-service", () => ({
   }))
 }));
 
-const { loginUser, registerUser } = await import("../services/user-service");
+const { loginUser, registerUser } = await import("../services/user-service.js");
 
 describe("auth routes", () => {
   beforeEach(() => {

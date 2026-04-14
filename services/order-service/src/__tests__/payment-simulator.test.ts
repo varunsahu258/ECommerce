@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { simulatePayment } from "../services/payment-simulator";
+import { simulatePayment } from "../services/payment-simulator.js";
 
 describe("payment simulator", () => {
   it("always succeeds in success mode", () => {
@@ -12,4 +12,3 @@ describe("payment simulator", () => {
     expect(result.failureReason).toMatch(/Simulated payment failure/);
   });
 });
-

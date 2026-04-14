@@ -1,8 +1,8 @@
 import type { CartItem, OrderItem, OrderRecord, OrderSummary } from "@ecommerce/shared";
-import { pool } from "../db/pool";
-import { ServiceError } from "../middleware/auth";
-import { getInventorySnapshot, reserveInventory } from "./product-client";
-import { type PaymentMode, simulatePayment } from "./payment-simulator";
+import { pool } from "../db/pool.js";
+import { ServiceError } from "../middleware/auth.js";
+import { getInventorySnapshot, reserveInventory } from "./product-client.js";
+import { type PaymentMode, simulatePayment } from "./payment-simulator.js";
 
 interface CheckoutActor {
   id: number;

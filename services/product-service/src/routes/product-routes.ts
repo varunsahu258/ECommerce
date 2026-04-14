@@ -7,8 +7,8 @@ import {
   listProducts,
   reserveInventory,
   updateProduct
-} from "../services/product-service";
-import { requireRole } from "../middleware/auth";
+} from "../services/product-service.js";
+import { requireRole } from "../middleware/auth.js";
 
 export const createProductRouter = () => {
   const router = Router();
@@ -84,4 +84,3 @@ export const createProductRouter = () => {
 
   return router;
 };
-

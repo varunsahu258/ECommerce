@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createToken, verifyToken } from "../services/token-service";
+import { createToken, verifyToken } from "../services/token-service.js";
 
 describe("token-service", () => {
   it("creates and verifies a token with role claims", () => {
@@ -16,4 +16,3 @@ describe("token-service", () => {
     expect(claims.role).toBe("user");
   });
 });
-

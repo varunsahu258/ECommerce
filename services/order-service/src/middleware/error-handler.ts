@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { ServiceError } from "./auth";
+import { ServiceError } from "./auth.js";
 
 export const errorHandler = (error: Error, _req: Request, res: Response, _next: NextFunction) => {
   if (error instanceof ServiceError) {
@@ -13,4 +13,3 @@ export const errorHandler = (error: Error, _req: Request, res: Response, _next: 
     error: "Unexpected order-service error."
   });
 };
-

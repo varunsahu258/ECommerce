@@ -1,4 +1,4 @@
-import { pool } from "./pool";
+import { pool } from "./pool.js";
 
 export const bootstrapDatabase = async () => {
   await pool.query(`
@@ -26,4 +26,3 @@ export const bootstrapDatabase = async () => {
     )
   `);
 };
-

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { coerceMoney, toSlug } from "../services/product-utils";
+import { coerceMoney, toSlug } from "../services/product-utils.js";
 
 describe("product utilities", () => {
   it("creates URL-friendly slugs", () => {
@@ -10,4 +10,3 @@ describe("product utilities", () => {
     expect(coerceMoney(19.999)).toBe(20);
   });
 });
-

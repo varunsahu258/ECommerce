@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import type { AuthResponse, AuthUser } from "@ecommerce/shared";
-import { pool } from "../db/pool";
-import { createToken } from "./token-service";
+import { pool } from "../db/pool.js";
+import { createToken } from "./token-service.js";
 
 export class ServiceError extends Error {
   constructor(

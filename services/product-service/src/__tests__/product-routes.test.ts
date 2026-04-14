@@ -1,6 +1,6 @@
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createApp } from "../app";
+import { createApp } from "../app.js";
 
 vi.mock("../services/product-service", () => ({
   listProducts: vi.fn(),
@@ -13,14 +13,14 @@ vi.mock("../services/product-service", () => ({
 }));
 
 vi.mock("../middleware/auth", async () => {
-  const actual = await vi.importActual<typeof import("../middleware/auth")>("../middleware/auth");
+  const actual = await vi.importActual<typeof import("../middleware/auth.js")>("../middleware/auth.js");
   return {
     ...actual,
     requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next()
   };
 });
 
-const { listProducts, getProductById } = await import("../services/product-service");
+const { listProducts, getProductById } = await import("../services/product-service.js");
 
 describe("product routes", () => {
   beforeEach(() => {

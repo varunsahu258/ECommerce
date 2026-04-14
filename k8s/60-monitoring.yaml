@@ -73,11 +73,7 @@ data:
               description: Failed checkout attempts are above the expected demo threshold.
 
           - alert: ElevatedApiLatency
-            expr: (
-              sum(rate(order_service_http_request_duration_seconds_sum[5m]))
-              /
-              sum(rate(order_service_http_request_duration_seconds_count[5m]))
-            ) > 1
+            expr: sum(rate(order_service_http_request_duration_seconds_sum[5m])) / sum(rate(order_service_http_request_duration_seconds_count[5m])) > 1
             for: 3m
             labels:
               severity: warning

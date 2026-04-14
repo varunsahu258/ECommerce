@@ -41,7 +41,7 @@ describe("selenium smoke flows", () => {
 
     const successBanner = await browser.wait(until.elementLocated(By.css(".success-banner")), 10000);
     expect(await successBanner.getText()).toContain("completed successfully");
-  });
+  }, 30000);
 
   it.skipIf(!ready)("shows a visible failed-checkout path", async () => {
     const browser = await createDriver();
@@ -63,5 +63,5 @@ describe("selenium smoke flows", () => {
 
     const failureBanner = await browser.wait(until.elementLocated(By.css(".error-banner")), 10000);
     expect(await failureBanner.getText()).toContain("Checkout failed intentionally");
-  });
+  }, 30000);
 });

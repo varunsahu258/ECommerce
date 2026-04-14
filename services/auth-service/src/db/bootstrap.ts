@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
-import { pool } from "./pool";
-import { env } from "../config/env";
+import { pool } from "./pool.js";
+import { env } from "../config/env.js";
 
 export const bootstrapDatabase = async () => {
   await pool.query(`
@@ -23,4 +23,3 @@ export const bootstrapDatabase = async () => {
     );
   }
 };
-

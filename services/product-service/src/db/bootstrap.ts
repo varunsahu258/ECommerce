@@ -1,4 +1,4 @@
-import { pool } from "./pool";
+import { pool } from "./pool.js";
 
 const seedProducts = [
   {
@@ -69,4 +69,3 @@ export const bootstrapDatabase = async () => {
     }
   }
 };
-

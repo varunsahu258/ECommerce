@@ -1,6 +1,6 @@
 import type { Product } from "@ecommerce/shared";
-import { env } from "../config/env";
-import { ServiceError } from "../middleware/auth";
+import { env } from "../config/env.js";
+import { ServiceError } from "../middleware/auth.js";
 
 const toJson = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {

@@ -7,7 +7,14 @@ spec:
   selector:
     app: selenium-hub
   ports:
-    - port: 4444
+    - name: event-publish
+      port: 4442
+      targetPort: 4442
+    - name: event-subscribe
+      port: 4443
+      targetPort: 4443
+    - name: web
+      port: 4444
       targetPort: 4444
 ---
 apiVersion: apps/v1

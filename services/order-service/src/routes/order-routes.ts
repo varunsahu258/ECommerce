@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { Counter } from "prom-client";
-import { type AuthenticatedRequest, requireRole } from "../middleware/auth";
-import { checkout, getAdminSummary, listOrders } from "../services/order-service";
+import { type AuthenticatedRequest, requireRole } from "../middleware/auth.js";
+import { checkout, getAdminSummary, listOrders } from "../services/order-service.js";
 
 export const createOrderRouter = (checkoutSuccessCounter: Counter<string>, checkoutFailureCounter: Counter<string>) => {
   const router = Router();
@@ -48,4 +48,3 @@ export const createOrderRouter = (checkoutSuccessCounter: Counter<string>, check
 
   return router;
 };
-

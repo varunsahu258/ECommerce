@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import type { UserRole } from "@ecommerce/shared";
-import { env } from "../config/env";
+import { env } from "../config/env.js";
 
 export interface JwtClaims {
   sub: string;

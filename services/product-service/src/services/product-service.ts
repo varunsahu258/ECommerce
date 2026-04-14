@@ -1,7 +1,7 @@
 import type { Product } from "@ecommerce/shared";
-import { pool } from "../db/pool";
-import { ServiceError } from "../middleware/auth";
-import { coerceMoney, toSlug } from "./product-utils";
+import { pool } from "../db/pool.js";
+import { ServiceError } from "../middleware/auth.js";
+import { coerceMoney, toSlug } from "./product-utils.js";
 
 interface ProductMutationInput {
   name: string;

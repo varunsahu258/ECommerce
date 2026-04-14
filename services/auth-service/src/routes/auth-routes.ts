@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { Counter } from "prom-client";
-import { loginUser, registerUser, ServiceError } from "../services/user-service";
-import { verifyToken } from "../services/token-service";
+import { loginUser, registerUser, ServiceError } from "../services/user-service.js";
+import { verifyToken } from "../services/token-service.js";
 
 export const createAuthRouter = (authFailureCounter: Counter<string>) => {
   const router = Router();
@@ -51,4 +51,3 @@ export const createAuthRouter = (authFailureCounter: Counter<string>) => {
 
   return router;
 };
-

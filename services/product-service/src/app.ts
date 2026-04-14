@@ -3,8 +3,8 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import { collectDefaultMetrics, Counter, Histogram, Registry } from "prom-client";
-import { createProductRouter } from "./routes/product-routes";
-import { errorHandler } from "./middleware/error-handler";
+import { createProductRouter } from "./routes/product-routes.js";
+import { errorHandler } from "./middleware/error-handler.js";
 
 export const createApp = () => {
   const app = express();
