@@ -186,7 +186,12 @@ sum(rate(order_service_checkout_success_total[5m]))
 kubectl port-forward svc/grafana 3000:3000 -n ecommerce-demo
 ```
 
-Open `http://localhost:3000` and load dashboard **ECommerce Overview** (uid: `ecommerce-overview`).
+Open `http://localhost:3000/grafana` and login with:
+
+- user: `admin`
+- password: `admin` (from `k8s/01-config.yaml` secret `GRAFANA_ADMIN_PASSWORD`)
+
+Then load dashboard **ECommerce Overview** (uid: `ecommerce-overview`).
 
 ### 4) Selenium Grid UI
 
@@ -201,6 +206,8 @@ To execute smoke tests:
 ```bash
 npm run test:selenium
 ```
+
+`npm run test:selenium` now sets `RUN_SELENIUM_SMOKE=1` so tests do not get silently skipped.
 
 ### 5) Jenkins
 
@@ -239,6 +246,37 @@ If using Kubernetes with a local image registry, also show image references:
 
 ```bash
 kubectl get deploy -n ecommerce-demo -o jsonpath='{range .items[*]}{.metadata.name}{" => "}{range .spec.template.spec.containers[*]}{.image}{" "}{end}{"\n"}{end}'
+```
+
+## Quick troubleshooting (common demo blockers)
+
+### Selenium tests are skipped
+
+- Confirm script uses `RUN_SELENIUM_SMOKE=1` (already configured in `tests/package.json`).
+- Ensure Selenium Hub is ready:
+
+```bash
+kubectl get pods -n ecommerce-demo | grep selenium
+kubectl logs -n ecommerce-demo deploy/selenium-hub --tail=50
+```
+
+### Grafana UI not loading
+
+1. Confirm Grafana pod is running:
+
+```bash
+kubectl get pods -n ecommerce-demo | grep grafana
+kubectl logs -n ecommerce-demo deploy/grafana --tail=80
+```
+
+2. Use the correct URL for port-forward mode:  
+   `http://localhost:3000/grafana` (not just `/`).
+3. Validate ingress path mode (if using ingress):  
+   `http://ecommerce.local/grafana`
+4. If login fails, verify secret value:
+
+```bash
+kubectl get secret platform-secrets -n ecommerce-demo -o jsonpath='{.data.GRAFANA_ADMIN_PASSWORD}' | base64 --decode && echo
 ```
 
 ## Observability
