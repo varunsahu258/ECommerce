@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import type { Product } from "@ecommerce/shared";
 import { productApi } from "../../api/client";
 import { useCart } from "../../hooks/useCart";
+import { handleProductImageError } from "../../utils/image-fallback";
 
 export const ProductDetailPage = () => {
   const { productId } = useParams();
@@ -35,7 +36,12 @@ export const ProductDetailPage = () => {
 
   return (
     <section className="detail-layout">
-      <img className="detail-layout__image" src={product.imageUrl} alt={product.name} />
+      <img
+        className="detail-layout__image"
+        src={product.imageUrl}
+        alt={product.name}
+        onError={(event) => handleProductImageError(event, product.name)}
+      />
       <div className="panel">
         <div className="eyebrow">{product.category}</div>
         <h2>{product.name}</h2>
