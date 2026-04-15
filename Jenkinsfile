@@ -10,7 +10,7 @@ pipeline {
     K8S_NAMESPACE = "ecommerce-demo"
     RUN_SELENIUM_SMOKE = "true"
     E2E_BASE_URL = "http://ecommerce.local"
-    SELENIUM_GRID_URL = "http://localhost:4444/wd/hub"
+    SELENIUM_GRID_URL = "http://localhost:4444"
   }
 
   stages {
@@ -69,21 +69,44 @@ pipeline {
               returnStatus: true,
               script: '''
                 node -e "
-                  const url = new URL(process.env.SELENIUM_GRID_URL);
-                  const http = require(url.protocol === 'https:' ? 'https' : 'http');
-                  const req = http.request(
-                    {
-                      hostname: url.hostname,
-                      port: url.port || (url.protocol === 'https:' ? 443 : 80),
-                      path: '/status',
-                      method: 'GET',
-                      timeout: 5000
-                    },
-                    (res) => process.exit(res.statusCode && res.statusCode < 500 ? 0 : 1)
-                  );
-                  req.on('error', () => process.exit(1));
-                  req.on('timeout', () => { req.destroy(); process.exit(1); });
-                  req.end();
+                  const baseUrl = process.env.SELENIUM_GRID_URL;
+                  const normalizedBase = baseUrl.replace(/\\/$/, '');
+                  const statusCandidates = normalizedBase.endsWith('/wd/hub')
+                    ? [normalizedBase.replace(/\\/wd\\/hub$/, '/status'), normalizedBase + '/status']
+                    : [normalizedBase + '/status', normalizedBase + '/wd/hub/status'];
+                  const http = require(baseUrl.startsWith('https:') ? 'https' : 'http');
+
+                  const checkStatus = (index) => {
+                    if (index >= statusCandidates.length) {
+                      process.exit(1);
+                    }
+
+                    const statusUrl = new URL(statusCandidates[index]);
+                    const req = http.request(
+                      {
+                        hostname: statusUrl.hostname,
+                        port: statusUrl.port || (statusUrl.protocol === 'https:' ? 443 : 80),
+                        path: statusUrl.pathname + statusUrl.search,
+                        method: 'GET',
+                        timeout: 5000
+                      },
+                      (res) => {
+                        if (res.statusCode && res.statusCode < 500) {
+                          process.exit(0);
+                        }
+                        checkStatus(index + 1);
+                      }
+                    );
+
+                    req.on('error', () => checkStatus(index + 1));
+                    req.on('timeout', () => {
+                      req.destroy();
+                      checkStatus(index + 1);
+                    });
+                    req.end();
+                  };
+
+                  checkStatus(0);
                 "
               '''
             )
