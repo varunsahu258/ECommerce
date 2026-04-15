@@ -62,14 +62,8 @@ pipeline {
 
     stage('Selenium Smoke Tests') {
       steps {
-        sh '''
-          set -eux
-          python3 --version
-          python3 -m venv .venv-selenium
-          . .venv-selenium/bin/activate
-          pip install -r tests/selenium/requirements.txt
-          python tests/selenium/smoke_scrape.py
-        '''
+        sh 'python3 --version'
+        sh 'npm run test:selenium'
       }
     }
 
