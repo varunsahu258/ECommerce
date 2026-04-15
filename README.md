@@ -23,7 +23,7 @@ If you need to present this in front of a professor, use the runbook below.
 - `services/order-service`: checkout flow, simulated payments, order history, admin summaries
 - `packages/shared`: TypeScript domain types shared across the stack
 - `tests`: API contract smoke tests and Selenium e2e flows
-- `k8s`: Kubernetes manifests for app, data, ingress, monitoring, and Selenium Grid
+- `k8s`: Kubernetes manifests for app, data, ingress, autoscaling, and monitoring
 - `docker`: supporting Docker/Grafana/Postgres assets
 
 ## Locked Public Paths
@@ -143,7 +143,7 @@ npm run test:api
 
 ## Kubernetes
 
-The root `k8s/` directory includes manifests for the frontend, services, PostgreSQL, ingress, autoscaling, Prometheus, Grafana, and Selenium Grid. The Jenkins pipeline deploys them with:
+The root `k8s/` directory includes manifests for the frontend, services, PostgreSQL, ingress, autoscaling, Prometheus, and Grafana. The Jenkins pipeline deploys them with:
 
 ```bash
 kubectl apply -f k8s/ -R
@@ -157,7 +157,7 @@ kubectl get svc -n ecommerce-demo
 kubectl get ingress -n ecommerce-demo
 ```
 
-## How to show Grafana, Prometheus, Jenkins, Selenium, Kubernetes, and Docker
+## How to show Grafana, Prometheus, Jenkins, Selenium (Python), Kubernetes, and Docker
 
 ### 1) Kubernetes status (cluster + app health)
 
@@ -177,7 +177,13 @@ kubectl port-forward svc/prometheus 9090:9090 -n ecommerce-demo
 Open `http://localhost:9090`, then run sample query:
 
 ```promql
-sum(rate(order_service_checkout_success_total[5m]))
+sum(order_service_checkout_success_total)
+```
+
+For recent activity windows (better for demos), use:
+
+```promql
+sum(increase(order_service_checkout_success_total[15m]))
 ```
 
 ### 3) Grafana UI
@@ -193,30 +199,18 @@ Open `http://localhost:3000/grafana` and login with:
 
 Then load dashboard **ECommerce Overview** (uid: `ecommerce-overview`).
 
-### 4) Selenium Grid UI
+### 4) Selenium Python smoke scraping
+
+Install Python dependency and execute smoke scraping against your running app:
 
 ```bash
-kubectl port-forward svc/selenium-hub 4444:4444 -n ecommerce-demo
-```
-
-If `/ui` is blank in your browser, open one of these directly:
-
-- `http://localhost:4444/ui/`
-- `http://localhost:4444/ui/index.html#/`
-
-Also verify Grid status JSON:
-
-- `http://localhost:4444/status`
-
-To execute smoke tests:
-
-```bash
+python3 -m pip install -r tests/selenium/requirements.txt
 npm run test:selenium
 ```
 
-`npm run test:selenium` now sets `RUN_SELENIUM_SMOKE=1` so tests do not get silently skipped.
+This test uses Python Selenium with a local headless browser (no Selenium Grid required).
 
-If your browser session is in Docker/Selenium Grid and cannot reach `localhost`, set:
+If your app is exposed from Docker and cannot be reached at `localhost`, set:
 
 ```bash
 E2E_BASE_URL=http://host.docker.internal:5173 npm run test:selenium
@@ -231,6 +225,20 @@ E2E_BASE_URL=http://ecommerce.local npm run test:selenium
 ### 5) Jenkins
 
 This repository includes a Jenkins pipeline (`Jenkinsfile`) that runs build, unit tests, API tests, Selenium tests, Docker image build/push, and Kubernetes deploy.
+
+If you accidentally deleted your Docker Jenkins container, recreate it with:
+
+```bash
+./docker/jenkins/recreate-container.sh
+```
+
+The helper builds `docker/jenkins/Dockerfile`, which includes `docker`, `kubectl`, Python3 + `pip`, Chromium, and ChromeDriver so Jenkins can execute Docker/Kubernetes stages and Python Selenium smoke checks.
+
+You can override defaults if needed, for example:
+
+```bash
+JENKINS_HTTP_PORT=18080 JENKINS_CONTAINER_NAME=jenkins-lab ./docker/jenkins/recreate-container.sh
+```
 
 > If your Jenkins log fails with `npm: not found`, use the latest `Jenkinsfile` from this repo.  
 > It now has a **Prepare Node.js Runtime** stage that downloads a `.tar.gz` Node.js 20 build into the workspace before running `npm install` (so it does not require `xz`), and it auto-detects `x64` vs `arm64` to avoid QEMU loader errors.
@@ -266,12 +274,7 @@ docker exec -it jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 If Docker commands fail in Jenkins container, run Jenkins with Docker socket mounted:
 
 ```bash
-docker rm -f jenkins
-docker run --name jenkins \
-  -p 8080:8080 -p 50000:50000 \
-  -v jenkins_home:/var/jenkins_home \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -d jenkins/jenkins:lts
+./docker/jenkins/recreate-container.sh
 ```
 
 If Jenkins is already running in your lab, open its job UI and show pipeline stages:
@@ -286,10 +289,7 @@ If Jenkins is already running in your lab, open its job UI and show pipeline sta
 If Jenkins is not running, start a local demo instance:
 
 ```bash
-docker run --name jenkins \
-  -p 8080:8080 -p 50000:50000 \
-  -v jenkins_home:/var/jenkins_home \
-  -d jenkins/jenkins:lts
+./docker/jenkins/recreate-container.sh
 ```
 
 Then open `http://localhost:8080`.
@@ -311,51 +311,29 @@ kubectl get deploy -n ecommerce-demo -o jsonpath='{range .items[*]}{.metadata.na
 
 ## Quick troubleshooting (common demo blockers)
 
-### Selenium tests are skipped
+### Selenium Python smoke test fails
 
-- Confirm script uses `RUN_SELENIUM_SMOKE=1` (already configured in `tests/package.json`).
-- Ensure Selenium Hub is ready:
+1. Install Python dependency first:
 
 ```bash
-kubectl get pods -n ecommerce-demo | grep selenium
-kubectl logs -n ecommerce-demo deploy/selenium-hub --tail=50
+python3 -m pip install -r tests/selenium/requirements.txt
 ```
 
-### Selenium UI is blank at `http://localhost:4444/ui`
-
-1. Try `http://localhost:4444/ui/` or `http://localhost:4444/ui/index.html#/`.
-2. Check Grid health endpoint:
+2. Ensure the web app is reachable:
 
 ```bash
-curl -s http://localhost:4444/status
+curl -I http://localhost:5173
 ```
 
-3. Confirm pods are Ready and node is registered:
+3. Run the smoke scraping test with an explicit app URL:
 
 ```bash
-kubectl get pods -n ecommerce-demo | grep selenium
-kubectl logs -n ecommerce-demo deploy/selenium-hub --tail=80
-kubectl logs -n ecommerce-demo deploy/selenium-chrome --tail=80
+E2E_BASE_URL=http://localhost:5173 npm run test:selenium
 ```
 
-4. Restart Selenium components if needed:
+4. If running against ingress:
 
 ```bash
-kubectl rollout restart deploy/selenium-hub -n ecommerce-demo
-kubectl rollout restart deploy/selenium-chrome -n ecommerce-demo
-```
-
-### Selenium test fails with `net::ERR_CONNECTION_REFUSED` at `browser.get(...)`
-
-This usually means Selenium browser cannot reach your app URL (network mismatch between host and container).
-
-Use one of these:
-
-```bash
-# app running with npm run dev:web on host machine
-E2E_BASE_URL=http://host.docker.internal:5173 npm run test:selenium
-
-# app running through Kubernetes ingress
 E2E_BASE_URL=http://ecommerce.local npm run test:selenium
 ```
 

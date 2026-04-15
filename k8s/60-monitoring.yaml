@@ -182,11 +182,11 @@ data:
           "id": 1,
           "targets": [
             {
-              "expr": "sum(rate(order_service_checkout_success_total[5m])) or vector(0)",
+              "expr": "sum(order_service_checkout_success_total) or vector(0)",
               "refId": "A"
             }
           ],
-          "title": "Checkout Success",
+          "title": "Checkout Success (Total)",
           "type": "stat"
         },
         {
@@ -196,11 +196,11 @@ data:
           "id": 2,
           "targets": [
             {
-              "expr": "sum(rate(order_service_checkout_failure_total[5m])) or vector(0)",
+              "expr": "sum(order_service_checkout_failure_total) or vector(0)",
               "refId": "A"
             }
           ],
-          "title": "Checkout Failure",
+          "title": "Checkout Failure (Total)",
           "type": "stat"
         },
         {
@@ -216,6 +216,26 @@ data:
           ],
           "title": "Auth Failures",
           "type": "stat"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": {}, "overrides": [] },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 18 },
+          "id": 5,
+          "targets": [
+            {
+              "expr": "sum(increase(order_service_checkout_success_total[15m])) or vector(0)",
+              "legendFormat": "checkout-success",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(increase(order_service_checkout_failure_total[15m])) or vector(0)",
+              "legendFormat": "checkout-failure",
+              "refId": "B"
+            }
+          ],
+          "title": "Checkout Attempts (Last 15m)",
+          "type": "timeseries"
         },
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
