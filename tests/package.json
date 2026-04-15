@@ -6,7 +6,7 @@
   "scripts": {
     "test": "vitest run",
     "test:api": "vitest run --dir api",
-    "test:selenium": "python3 -m venv .venv && .venv/bin/pip install -r selenium/requirements.txt && .venv/bin/python selenium/smoke_scrape.py"
+    "test:selenium": "python3 -m pip install -r selenium/requirements.txt && python3 selenium/smoke_scrape.py"
   },
   "dependencies": {
     "supertest": "^7.1.1"
