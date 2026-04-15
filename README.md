@@ -215,13 +215,6 @@ npm run test:selenium
 ```
 
 `npm run test:selenium` now sets `RUN_SELENIUM_SMOKE=1` so tests do not get silently skipped.
-It is now **non-strict by default** (`SELENIUM_STRICT=0`) for local demos: if app URL is unreachable, tests log warning and return without failing the full run.
-
-To enforce hard-fail behavior (CI-grade strict mode), use:
-
-```bash
-npm run test:selenium:strict
-```
 
 If your browser session is in Docker/Selenium Grid and cannot reach `localhost`, set:
 
@@ -241,11 +234,6 @@ This repository includes a Jenkins pipeline (`Jenkinsfile`) that runs build, uni
 
 > If your Jenkins log fails with `npm: not found`, use the latest `Jenkinsfile` from this repo.  
 > It now has a **Prepare Node.js Runtime** stage that downloads a `.tar.gz` Node.js 20 build into the workspace before running `npm install` (so it does not require `xz`), and it auto-detects `x64` vs `arm64` to avoid QEMU loader errors.
->
-> Selenium stage note: the pipeline now checks Grid reachability first. If Grid is down/unresolvable, the stage is marked **UNSTABLE** and the pipeline continues.  
-> Default Grid URL is `http://localhost:4444/wd/hub`; set `SELENIUM_GRID_URL` in Jenkins job env when your hub is elsewhere (for example `http://selenium-hub:4444/wd/hub` inside Kubernetes network/DNS).
->
-> Docker/Kubernetes stage note: the pipeline now bootstraps `docker` CLI and `kubectl` into the workspace (`.tools/bin`) if they are missing from Jenkins runtime, so Docker/Kubernetes stages can run on minimal Jenkins containers too.
 
 If Jenkins is showing only the **InitialAdminPassword** page, do this first-time setup:
 
@@ -388,66 +376,6 @@ kubectl logs -n ecommerce-demo deploy/grafana --tail=80
 
 ```bash
 kubectl get secret platform-secrets -n ecommerce-demo -o jsonpath='{.data.GRAFANA_ADMIN_PASSWORD}' | base64 --decode && echo
-```
-
-### Grafana opens but panels are blank / Prometheus query returns no data
-
-This is usually one of these three: no scrape targets, no recent traffic, or stale dashboard provisioning.
-
-1. Verify Prometheus targets are up (open **Status → Targets** in Prometheus UI):
-
-```bash
-kubectl port-forward svc/prometheus 9090:9090 -n ecommerce-demo
-# then open http://localhost:9090/prometheus/targets
-```
-
-2. Run direct Prometheus queries that should always return something:
-
-```bash
-# should show 1 for healthy services
-up{job="auth-service"}
-up{job="product-service"}
-up{job="order-service"}
-```
-
-3. Generate fresh traffic so rate-based panels have data:
-
-```bash
-curl -s http://ecommerce.local/api/products > /dev/null
-curl -s http://ecommerce.local/api/auth/healthz > /dev/null
-curl -s http://ecommerce.local/api/orders/healthz > /dev/null
-```
-
-4. In Grafana, set dashboard time range to **Last 15 minutes** and click **Refresh**.
-5. If still blank after updating manifests, restart observability pods once:
-
-```bash
-kubectl rollout restart deploy/prometheus -n ecommerce-demo
-kubectl rollout restart deploy/grafana -n ecommerce-demo
-```
-
-### Selenium Grid: what to do (quick path)
-
-1. Start Grid access:
-
-```bash
-kubectl port-forward svc/selenium-hub 4444:4444 -n ecommerce-demo
-```
-
-2. Confirm hub health:
-
-```bash
-curl -s http://localhost:4444/status
-```
-
-3. Open UI:
-   - `http://localhost:4444/ui/`
-   - fallback: `http://localhost:4444/ui/index.html#/`
-
-4. Run smoke tests with explicit browser-reachable app URL:
-
-```bash
-E2E_BASE_URL=http://ecommerce.local SELENIUM_GRID_URL=http://localhost:4444/wd/hub npm run test:selenium
 ```
 
 ## Observability
