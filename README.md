@@ -177,7 +177,13 @@ kubectl port-forward svc/prometheus 9090:9090 -n ecommerce-demo
 Open `http://localhost:9090`, then run sample query:
 
 ```promql
-sum(rate(order_service_checkout_success_total[5m]))
+sum(order_service_checkout_success_total)
+```
+
+For recent activity windows (better for demos), use:
+
+```promql
+sum(increase(order_service_checkout_success_total[15m]))
 ```
 
 ### 3) Grafana UI
