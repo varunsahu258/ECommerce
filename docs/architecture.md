@@ -4,7 +4,7 @@
 
 `GitHub -> Jenkins -> Docker -> Kubernetes -> Prometheus/Grafana`
 
-Selenium Grid is used inside the CI/CD flow for browser smoke tests against the deployed ingress endpoint.
+Python Selenium (headless Chrome) is used inside CI for browser smoke-scraping checks against the deployed ingress endpoint.
 
 ## Service Boundaries
 
@@ -45,4 +45,3 @@ Selenium Grid is used inside the CI/CD flow for browser smoke tests against the 
 - Services communicate internally via Kubernetes service DNS
 - Prometheus scrapes `/metrics`
 - Grafana exposes dashboards through ingress
-
