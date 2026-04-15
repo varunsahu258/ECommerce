@@ -1,25 +1,38 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { Builder, By, until, WebDriver } from "selenium-webdriver";
 
-const seleniumUrl = process.env.SELENIUM_GRID_URL ?? "http://localhost:4444/wd/hub";
+const seleniumUrl = process.env.SELENIUM_GRID_URL ?? "http://localhost:4444";
+const seleniumUrlCandidates = Array.from(new Set([
+  seleniumUrl,
+  seleniumUrl.endsWith("/wd/hub") ? seleniumUrl.replace(/\/wd\/hub\/?$/, "") : `${seleniumUrl.replace(/\/$/, "")}/wd/hub`
+]));
 const defaultBaseUrls = ["http://localhost:30080", "http://host.docker.internal:30080", "http://localhost:5173", "http://host.docker.internal:5173", "http://ecommerce.local"];
 const baseUrls = process.env.E2E_BASE_URL ? [process.env.E2E_BASE_URL] : defaultBaseUrls;
+const strictSelenium = process.env.RUN_SELENIUM_SMOKE_STRICT === "1";
 
 let driver: WebDriver | undefined;
 
 const createDriver = async (): Promise<WebDriver | undefined> => {
-  try {
-    driver = await new Builder().forBrowser("chrome").usingServer(seleniumUrl).build();
-    return driver;
-  } catch (error) {
-    if (!strictSelenium) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.warn(`[selenium-smoke] Selenium Grid unreachable at ${seleniumUrl}: ${errorMessage}`);
-      return undefined;
-    }
+  const connectionErrors: string[] = [];
 
-    throw error;
+  for (const candidateUrl of seleniumUrlCandidates) {
+    try {
+      driver = await new Builder().forBrowser("chrome").usingServer(candidateUrl).build();
+      return driver;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      connectionErrors.push(`${candidateUrl} -> ${errorMessage}`);
+    }
   }
+
+  const message = `Selenium Grid unreachable. Tried: ${connectionErrors.join(" | ")}`;
+
+  if (!strictSelenium) {
+    console.warn(`[selenium-smoke] ${message}`);
+    return undefined;
+  }
+
+  throw new Error(message);
 };
 
 const navigateWithFallback = async (browser: WebDriver, path = "/"): Promise<boolean> => {
@@ -51,30 +64,6 @@ const navigateWithFallback = async (browser: WebDriver, path = "/"): Promise<boo
   }
 
   throw new Error(message);
-};
-
-const navigateWithFallback = async (browser: WebDriver, path = "/") => {
-  const connectionErrors: string[] = [];
-
-  for (const baseUrl of baseUrls) {
-    const targetUrl = new URL(path, baseUrl).toString();
-    try {
-      await browser.get(targetUrl);
-      return;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      connectionErrors.push(`${targetUrl} -> ${errorMessage}`);
-      const isConnectionError = /ERR_CONNECTION_REFUSED|net::ERR_|ECONNREFUSED/i.test(errorMessage);
-
-      if (!isConnectionError) {
-        throw error;
-      }
-    }
-  }
-
-  throw new Error(
-    `Unable to open app in Selenium browser. Tried: ${connectionErrors.join(" | ")}. Set E2E_BASE_URL to a browser-reachable URL.`
-  );
 };
 
 const ready = Boolean(process.env.RUN_SELENIUM_SMOKE);

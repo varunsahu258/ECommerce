@@ -232,6 +232,18 @@ E2E_BASE_URL=http://ecommerce.local npm run test:selenium
 
 This repository includes a Jenkins pipeline (`Jenkinsfile`) that runs build, unit tests, API tests, Selenium tests, Docker image build/push, and Kubernetes deploy.
 
+If you accidentally deleted your Docker Jenkins container, recreate it with:
+
+```bash
+./docker/jenkins/recreate-container.sh
+```
+
+You can override defaults if needed, for example:
+
+```bash
+JENKINS_HTTP_PORT=18080 JENKINS_CONTAINER_NAME=jenkins-lab ./docker/jenkins/recreate-container.sh
+```
+
 > If your Jenkins log fails with `npm: not found`, use the latest `Jenkinsfile` from this repo.  
 > It now has a **Prepare Node.js Runtime** stage that downloads a `.tar.gz` Node.js 20 build into the workspace before running `npm install` (so it does not require `xz`), and it auto-detects `x64` vs `arm64` to avoid QEMU loader errors.
 
