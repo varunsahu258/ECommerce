@@ -182,7 +182,7 @@ data:
           "id": 1,
           "targets": [
             {
-              "expr": "sum(rate(order_service_checkout_success_total[5m]))",
+              "expr": "sum(rate(order_service_checkout_success_total[5m])) or vector(0)",
               "refId": "A"
             }
           ],
@@ -196,7 +196,7 @@ data:
           "id": 2,
           "targets": [
             {
-              "expr": "sum(rate(order_service_checkout_failure_total[5m]))",
+              "expr": "sum(rate(order_service_checkout_failure_total[5m])) or vector(0)",
               "refId": "A"
             }
           ],
@@ -210,7 +210,7 @@ data:
           "id": 3,
           "targets": [
             {
-              "expr": "sum(rate(auth_service_auth_failures_total[5m]))",
+              "expr": "sum(rate(auth_service_auth_failures_total[5m])) or vector(0)",
               "refId": "A"
             }
           ],
@@ -224,17 +224,17 @@ data:
           "id": 4,
           "targets": [
             {
-              "expr": "sum(rate(order_service_http_request_duration_seconds_sum[5m])) / sum(rate(order_service_http_request_duration_seconds_count[5m]))",
+              "expr": "(sum(rate(order_service_http_request_duration_seconds_sum[5m])) / clamp_min(sum(rate(order_service_http_request_duration_seconds_count[5m])), 0.0001)) or vector(0)",
               "legendFormat": "order-service",
               "refId": "A"
             },
             {
-              "expr": "sum(rate(product_service_http_request_duration_seconds_sum[5m])) / sum(rate(product_service_http_request_duration_seconds_count[5m]))",
+              "expr": "(sum(rate(product_service_http_request_duration_seconds_sum[5m])) / clamp_min(sum(rate(product_service_http_request_duration_seconds_count[5m])), 0.0001)) or vector(0)",
               "legendFormat": "product-service",
               "refId": "B"
             },
             {
-              "expr": "sum(rate(auth_service_http_request_duration_seconds_sum[5m])) / sum(rate(auth_service_http_request_duration_seconds_count[5m]))",
+              "expr": "(sum(rate(auth_service_http_request_duration_seconds_sum[5m])) / clamp_min(sum(rate(auth_service_http_request_duration_seconds_count[5m])), 0.0001)) or vector(0)",
               "legendFormat": "auth-service",
               "refId": "C"
             }
