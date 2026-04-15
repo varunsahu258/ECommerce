@@ -4,6 +4,7 @@ import { Builder, By, until, WebDriver } from "selenium-webdriver";
 const seleniumUrl = process.env.SELENIUM_GRID_URL ?? "http://localhost:4444/wd/hub";
 const defaultBaseUrls = ["http://localhost:30080", "http://host.docker.internal:30080", "http://localhost:5173", "http://host.docker.internal:5173", "http://ecommerce.local"];
 const baseUrls = process.env.E2E_BASE_URL ? [process.env.E2E_BASE_URL] : defaultBaseUrls;
+const strictSelenium = process.env.RUN_SELENIUM_SMOKE_STRICT === "1";
 
 let driver: WebDriver | undefined;
 
@@ -51,30 +52,6 @@ const navigateWithFallback = async (browser: WebDriver, path = "/"): Promise<boo
   }
 
   throw new Error(message);
-};
-
-const navigateWithFallback = async (browser: WebDriver, path = "/") => {
-  const connectionErrors: string[] = [];
-
-  for (const baseUrl of baseUrls) {
-    const targetUrl = new URL(path, baseUrl).toString();
-    try {
-      await browser.get(targetUrl);
-      return;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      connectionErrors.push(`${targetUrl} -> ${errorMessage}`);
-      const isConnectionError = /ERR_CONNECTION_REFUSED|net::ERR_|ECONNREFUSED/i.test(errorMessage);
-
-      if (!isConnectionError) {
-        throw error;
-      }
-    }
-  }
-
-  throw new Error(
-    `Unable to open app in Selenium browser. Tried: ${connectionErrors.join(" | ")}. Set E2E_BASE_URL to a browser-reachable URL.`
-  );
 };
 
 const ready = Boolean(process.env.RUN_SELENIUM_SMOKE);
