@@ -6,7 +6,8 @@
   "scripts": {
     "test": "vitest run",
     "test:api": "vitest run --dir api",
-    "test:selenium": "vitest run --dir selenium"
+    "test:selenium": "RUN_SELENIUM_SMOKE=1 SELENIUM_STRICT=0 vitest run --dir selenium",
+    "test:selenium:strict": "RUN_SELENIUM_SMOKE=1 SELENIUM_STRICT=1 vitest run --dir selenium"
   },
   "dependencies": {
     "selenium-webdriver": "^4.27.0",
